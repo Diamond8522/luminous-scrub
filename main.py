@@ -6,7 +6,7 @@ def main():
     scanner = LuminousScanner()
     
     # Example logic: checking a local string
-    test_data = "api_key = 'CLEAN_AND_LUMINOUS_DATA'"
+    test_data = "api_key = 'this is a beautiful, luminous project with no secrets'"
     report = scanner.scan(test_data)
     
     print(f"Analysis Complete: {report}")
