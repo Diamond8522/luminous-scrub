@@ -2,25 +2,45 @@ import math
 import re
 
 class LuminousScanner:
-    """A resilient hunter for secrets and chaos."""
+    """A tuned sentinel that distinguishes between creative chaos and actual leaks."""
+    
     def __init__(self):
-        # Tracking standard patterns that shouldn't be in the wild
+        # Sharpened patterns to catch specific 'Mercenary' secrets
         self.patterns = [
-            r"(?i)api_key\s*[:=]\s*['\"].+['\"]",
-            r"(?i)secret\s*[:=]\s*['\"].+['\"]",
-            r"sk-[a-zA-Z0-9]{48}" # OpenAI Key Pattern
+            r"(?i)(api_key|secret|token|password|auth|credential)\s*[:=]\s*['\"].+['\"]",
+            r"(sk|ak|as)-[a-zA-Z0-9]{32,}",
+            r"(?i)key-[a-zA-Z0-9]{32,}"
         ]
 
     def calculate_entropy(self, data):
-        """Math to find high-randomness (potential keys)."""
-        if not data: return 0
+        """Calculates Shannon Entropy. 0 is static; 8 is pure noise."""
+        if not data:
+            return 0
         entropy = 0
         for x in range(256):
             p_x = float(data.count(chr(x))) / len(data)
-            if p_x > 0: entropy += - p_x * math.log(p_x, 2)
+            if p_x > 0:
+                entropy += - p_x * math.log(p_x, 2)
         return round(entropy, 2)
 
     def scan(self, content):
         entropy = self.calculate_entropy(content)
-        leaks = [p for p in self.patterns if re.search(p, content)]
-        return {"entropy": entropy, "leaks_found": len(leaks), "status": "LUMINOUS" if not leaks else "BRUISED"}
+        
+        # Check for any regex matches (The 'Smoking Gun')
+        found_leaks = []
+        for pattern in self.patterns:
+            matches = re.findall(pattern, content)
+            if matches:
+                found_leaks.extend(matches)
+        
+        # 🦾 THE INTELLIGENT GATE:
+        # We mark as BRUISED if:
+        # 1. We found a regex match (High confidence leak)
+        # 2. OR Entropy is > 5.5 (Prevents emojis/code syntax from false alarms)
+        is_bruised = len(found_leaks) > 0 or entropy > 5.5
+        
+        return {
+            "entropy": entropy, 
+            "leaks_found": len(found_leaks), 
+            "status": "BRUISED" if is_bruised else "LUMINOUS"
+        }
